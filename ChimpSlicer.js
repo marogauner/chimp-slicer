@@ -1,5 +1,5 @@
-let chimp;
 let chimpSprite;
+let chimps = [];
 
 function preload() {
     chimpSprite = loadImage("./assets/sprites/chimp.png");
@@ -7,14 +7,18 @@ function preload() {
 
 function setup() {
     createCanvas(600, 400);
-    frameRate(30);
+    frameRate(60);
 
-    chimp = new Chimp(chimpSprite);
+    for (var i = 0; i < 1; i++){
+        chimps.push(new Chimp(random(0, width), height, chimpSprite));
+    }
 }
 
 function draw() {
     background(200);
-    chimp.update();
-    chimp.draw();
+    for (var i = 0; i < chimps.length; i++) {
+        chimps[i].update();
+        chimps[i].draw();
+    }
     line(pmouseX, pmouseY, mouseX, mouseY);
 }
