@@ -9,9 +9,10 @@ function Chimp(x, y, sprite) {
     } else {
         this.rotationSpeed = random(-0.05, 0);
     }
-    this.debug = false;
+    this.radius = 16;
+    this.debug = true;
     if (this.debug) {
-        this.collisionRect = rect(this.position.x, this.position.y, 32, 32);
+        this.collisionCircle = circle(this.position.x, this.position.y, this.radius*2);
     }
 }
 
@@ -20,7 +21,7 @@ Chimp.prototype.update = function() {
     this.velocity.y += this.gravity;
     this.angle += this.rotationSpeed;
     if (this.debug) {
-        this.collisionCircle = circle(this.position.x, this.position.y, 32);
+        this.collisionCircle = circle(this.position.x, this.position.y, this.radius*2);
     }
 }
 
@@ -44,6 +45,5 @@ function randomVelocityX(x) {
 
 Chimp.prototype.isCollidingWithMouse = function() {
     let distance = dist(mouseX, mouseY, this.position.x, this.position.y);
-    let radius = 16;
-    return distance < radius;
+    return distance < this.radius;
 }
