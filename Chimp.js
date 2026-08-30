@@ -9,12 +9,19 @@ function Chimp(x, y, sprite) {
     } else {
         this.rotationSpeed = random(-0.05, 0);
     }
+    this.debug = false;
+    if (this.debug) {
+        this.collisionRect = rect(this.position.x, this.position.y, 32, 32);
+    }
 }
 
 Chimp.prototype.update = function() {
     this.position.add(this.velocity);
     this.velocity.y += this.gravity;
     this.angle += this.rotationSpeed;
+    if (this.debug) {
+        this.collisionCircle = circle(this.position.x, this.position.y, 32);
+    }
 }
 
 Chimp.prototype.draw = function() {
@@ -33,4 +40,10 @@ function randomVelocityX(x) {
     else {
         return random(-2, -0.5);
     }
+}
+
+Chimp.prototype.isCollidingWithMouse = function() {
+    let distance = dist(mouseX, mouseY, this.position.x, this.position.y);
+    let radius = 16;
+    return distance < radius;
 }
