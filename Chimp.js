@@ -55,6 +55,4 @@ Chimp.prototype.isCollidingWithMouse = function () {
   return distance < this.radius;
 };
 
-Chimp.prototype.isOffScreen = function () {
-  return this.position.y > height;
-};
+
