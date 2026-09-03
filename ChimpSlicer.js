@@ -3,6 +3,9 @@ let chimpSprite;
 let deadChimpHeadSprite;
 let deadChimpBodySprite;
 let wheatCornSprite;
+let bombExplosionSpritesheet;
+
+let bombAnimations = [];
 // ...
 let chimps = [];
 let bodyParts = [];
@@ -21,7 +24,7 @@ function preload() {
   deadChimpBodySprite = loadImage("./assets/sprites/deadChimpBody.png");
   bombSprite = loadImage("./assets/sprites/bomb.png");
   wheatCornSprite = loadImage("./assets/sprites/wheatCorn.png");
-
+  bombExplosionSpritesheet = loadImage("./assets/sprites/bombexplosion.png");
 }
 
 function setup() {
@@ -45,6 +48,7 @@ function draw() {
   updateChimps(slicer.trail);
   slicer.update();
   slicer.draw();
+  updateBombExplosions();
 
   drawDebugInfo();
   drawHp();
@@ -76,6 +80,12 @@ function createRestartButton() {
   restartButton.position(width + 20, 10);
   restartButton.mousePressed(() => {
     spawnChimps(floor(random(5, 50)));
+    bombs.push(new Bomb(
+      random(0, width),
+      height,
+      bombSprite,
+      2
+    ));
   });
   restartButton.addClass("restart-button");
 }
@@ -114,8 +124,21 @@ function updateChimps(mousePositions) {
     bombs[i].update();
     bombs[i].draw();
     if (bombs[i].isCollidingWithMouse(mousePositions)) {
+      let bombX = bombs[i].position.x;
+      let bombY = bombs[i].position.y
+      let bombScale = bombs[i].scale;
       bombs.splice(i, 1);
       hp--;
+      bombAnimations.push(
+        new AnimatedSprite(
+          bombX,
+          bombY,
+          bombScale,
+          32,
+          bombExplosionSpritesheet,
+          50
+        )
+      );
     }
     else if (isOffScreen(bombs[i].position.y)) {
       bombs.splice(i, 1);
@@ -174,4 +197,14 @@ function drawHp() {
     );
   }
   pop();
+}
+
+function updateBombExplosions() {
+  for (let i = bombAnimations.length - 1; i >= 0; i--) {
+    bombAnimations[i].update();
+    bombAnimations[i].display();
+    if (bombAnimations[i].finished) {
+      bombAnimations.splice(i, 1);
+    }
+  }
 }
