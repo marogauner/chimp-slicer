@@ -2,18 +2,26 @@
 let chimpSprite;
 let deadChimpHeadSprite;
 let deadChimpBodySprite;
+let wheatCornSprite;
 // ...
 let chimps = [];
 let bodyParts = [];
 let slicer = new Slicer();
+let bombs = [];
 // spawning chimps
 let lastSpawnTime = 0;
 let spawnInterval = 3000;
+
+//
+let hp = 3;
 
 function preload() {
   chimpSprite = loadImage("./assets/sprites/chimp.png");
   deadChimpHeadSprite = loadImage("./assets/sprites/deadChimpHead.png");
   deadChimpBodySprite = loadImage("./assets/sprites/deadChimpBody.png");
+  bombSprite = loadImage("./assets/sprites/bomb.png");
+  wheatCornSprite = loadImage("./assets/sprites/wheatCorn.png");
+
 }
 
 function setup() {
@@ -23,6 +31,12 @@ function setup() {
   noSmooth();
 
   createRestartButton();
+  bombs.push(new Bomb(
+    random(0, width),
+    height,
+    bombSprite,
+    2
+  ));
 }
 
 function draw() {
@@ -31,7 +45,9 @@ function draw() {
   updateChimps(slicer.trail);
   slicer.update();
   slicer.draw();
+
   drawDebugInfo();
+  drawHp();
 }
 
 function chimpSpawner() {
@@ -45,7 +61,13 @@ function chimpSpawner() {
 
 function spawnChimps(x) {  
   for (var i = 0; i < x; i++) {
-    chimps.push(new Chimp(random(0, width), height, chimpSprite));
+    chimps.push(
+      new Chimp(
+        random(0, width),
+        height,
+        chimpSprite,
+        1.5
+      ));
   }
 }
 
@@ -59,17 +81,16 @@ function createRestartButton() {
 }
 
 function updateChimps(mousePositions) {
+  // update chimps
   for (let i = chimps.length - 1; i >= 0; i--) {
     chimps[i].update();
     chimps[i].draw();
     if (chimps[i].isCollidingWithMouse(mousePositions)) {
       spawnChimpBody(
-        chimps[i].position,
+        chimps[i].position.x,
+        chimps[i].position.y,
+        chimps[i].scale,
         chimps[i].velocity,
-        chimps[i].gravity,
-        chimps[i].angle,
-        chimps[i].rotationSpeed,
-        chimps[i].scale
       );
       chimps.splice(i, 1);
     }
@@ -79,6 +100,7 @@ function updateChimps(mousePositions) {
     }
   }
 
+  // update BodyParts
   for (let i = bodyParts.length - 1; i >= 0; i--) {
     bodyParts[i].update();
     bodyParts[i].draw();
@@ -86,37 +108,45 @@ function updateChimps(mousePositions) {
       bodyParts.splice(i, 1);
     }
   }
+
+  // update bombs
+  for (let i = bombs.length - 1; i >= 0; i--) {
+    bombs[i].update();
+    bombs[i].draw();
+    if (bombs[i].isCollidingWithMouse(mousePositions)) {
+      bombs.splice(i, 1);
+      hp--;
+    }
+    else if (isOffScreen(bombs[i].position.y)) {
+      bombs.splice(i, 1);
+    }
+  }
 }
 
 function spawnChimpBody(
-  chimpPosition,
+  x,
+  y,
+  scale,
   chimpVelocity,
-  chimpGravity,
-  chimpAngle,
-  chimpRotationSpeed,
-  chimpScale
 ) {
   bodyParts.push(
     head = new ChimpBodyParts(
-      chimpPosition,
+      x,
+      y,
+      scale,
       chimpVelocity,
-      chimpGravity,
-      chimpAngle,
-      chimpRotationSpeed,
-      chimpScale,
       deadChimpHeadSprite
     )
   );
 
   bodyParts.push(
     body = new ChimpBodyParts(
-      chimpPosition,
+      x,
+      y,
+      scale,
       createVector(chimpVelocity.x * -1, chimpVelocity.y),
-      chimpGravity,
-      chimpAngle,
-      chimpRotationSpeed * -1,
-      chimpScale,
-      deadChimpBodySprite
+      deadChimpBodySprite,
+      -1, // rotationSpeed factor
     )
   );
 }
@@ -129,5 +159,19 @@ function drawDebugInfo() {
   push();
   text("num_chimps:" + chimps.length, 0, 10);
   text("num_bodyParts:" + bodyParts.length, 0, 25);
+  text("num_bombs:" + bombs.length, 0, 40);
+  pop();
+}
+
+function drawHp() {
+  push();
+  if (hp <= 0) return;
+  for (let i = 0; i < hp; i++) {
+    image(
+      wheatCornSprite,
+      width - (wheatCornSprite.width * (i+1)),
+      10,
+    );
+  }
   pop();
 }
